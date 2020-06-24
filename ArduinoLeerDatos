@@ -1,0 +1,74 @@
+
+#include "EmonLib.h"                              //Libreria para lectura de datos analogicos
+
+#include <SoftwareSerial.h>                           
+#define rx 2                                          
+#define tx 3                                          
+
+SoftwareSerial myserial(rx, tx);                      
+
+EnergyMonitor energyMonitor;                      // Crear una instancia EnergyMonitor
+float voltajeRed = 124.0;                         // Voltaje de nuestra red electrica
+
+String inputstring = "";                             
+String sensorstring = "";                            
+boolean input_string_complete = false;               
+boolean sensor_string_complete = false;              
+float DO;                                            
+
+
+
+void setup() {                                       
+  Serial.begin(9600);                                
+  myserial.begin(9600);                              
+  inputstring.reserve(10);                            
+  sensorstring.reserve(30);                           
+  energyMonitor.current(0, 1.24);                 //Número del analogo conectado y valor de calibración teórica
+}
+
+
+void serialEvent() {                                  
+  inputstring = Serial.readStringUntil(13);           
+  input_string_complete = true;                       
+}
+
+
+void loop() {                                         
+
+  if (input_string_complete == true) {                
+    myserial.print(inputstring);                      
+    myserial.print('\r');                             
+    inputstring = "";                                 
+    input_string_complete = false;                    
+  }
+
+  if (myserial.available() > 0) {                     
+    char inchar = (char)myserial.read();              
+    sensorstring += inchar;                           
+    if (inchar == '\r') {                             
+      sensor_string_complete = true;                  
+    }
+  }
+
+
+  if (sensor_string_complete == true) {               
+    // Obtenemos el valor de la corriente eficaz
+  // Pasamos el núero de muestras que queremos tomar
+  double Irms = energyMonitor.calcIrms(1484);
+
+  // Calculamos la potencia aparente
+  double potencia =  Irms * voltajeRed;
+
+  // Mostramos la informaciÃ³n por el monitor serie
+  Serial.print("Watts = ");
+  Serial.println(potencia);
+  Serial.print("Irms = ");
+  Serial.println(Irms);
+    Serial.println("DO2 = "+sensorstring);
+    //send that string to the PC's serial monitor
+    
+    
+    sensorstring = "";                                
+    sensor_string_complete = false;                   
+  }
+}
