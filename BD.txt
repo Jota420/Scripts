@@ -1,0 +1,10 @@
+SELECT * FROM DBO.DB_ESTUDIANTE;
+drop table DB_ESTUDIANTE;
+CREATE TABLE dbo.db_estudiante (
+ci varchar(10) primary key,
+nombre varchar(250),
+apellido varchar(250),
+direccion varchar(250)
+);
+
+insert into dbo.db_estudiante(ci,nombre,apellido,direccion) values('1717684573','Jonathan','Ramos','La Magdalena');

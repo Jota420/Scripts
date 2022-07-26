@@ -1,0 +1,153 @@
+----------------Clase Conexion.cs BD--------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace CRUD
+{
+    internal class conexion
+    {
+        public static SqlConnection Conectar()
+        {
+            SqlConnection cn = new SqlConnection("SERVER=DESKTOP-NJI9E6B; DATABASE=LOCAL; integrated security=true");
+            cn.Open();
+            return cn;
+
+        }
+    }
+}
+
+-----------------------------------C#-------------------------------------
+sing System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace CRUD
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            conexion.Conectar();
+            MessageBox.Show("Conexión Exitosa");
+            dataGridView1.DataSource = llenar_grid();
+        }
+        public DataTable llenar_grid()
+        {
+            conexion.Conectar();
+            DataTable dt = new DataTable();
+            string consulta = "SELECT * FROM db_estudiante";
+            SqlCommand cmd = new SqlCommand(consulta,conexion.Conectar());
+
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            da.Fill(dt);
+
+            return dt;
+        }
+
+        private void textBoxCedula_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnCrear_Click(object sender, EventArgs e)
+        {
+            conexion.Conectar();
+            string insertar = "INSERT INTO db_estudiante(CI,NOMBRE,APELLIDO,DIRECCION) values(@CI,@NOMBRE,@APELLIDO,@DIRECCION)";
+            SqlCommand cmd1 = new SqlCommand(insertar,conexion.Conectar());
+            cmd1.Parameters.AddWithValue("@CI", textBoxCedula.Text);
+            cmd1.Parameters.AddWithValue("@NOMBRE", textBoxNombre.Text);
+            cmd1.Parameters.AddWithValue("@APELLIDO", textBoxApellido.Text);
+            cmd1.Parameters.AddWithValue("@DIRECCION", textBoxDireccion.Text);
+
+            cmd1.ExecuteNonQuery();
+            MessageBox.Show("Datos Insertados");
+
+            dataGridView1.DataSource = llenar_grid();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                textBoxCedula.Text = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+                textBoxNombre.Text = dataGridView1.CurrentRow.Cells[1].Value.ToString();
+                textBoxApellido.Text = dataGridView1.CurrentRow.Cells[2].Value.ToString();
+                textBoxDireccion.Text = dataGridView1.CurrentRow.Cells[3].Value.ToString();
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void buttonmd_Click(object sender, EventArgs e)
+        {
+            conexion.Conectar();
+            string actualizar = "UPDATE DB_ESTUDIANTE SET CI=@CI,NOMBRE=@NOMBRE,APELLIDO=@APELLIDO,DIRECCION=@DIRECCION WHERE CI=@CI";
+            SqlCommand cmd2 = new SqlCommand(actualizar, conexion.Conectar());
+
+            cmd2.Parameters.AddWithValue("@CI", textBoxCedula.Text);
+            cmd2.Parameters.AddWithValue("@NOMBRE", textBoxNombre.Text);
+            cmd2.Parameters.AddWithValue("@APELLIDO", textBoxApellido.Text);
+            cmd2.Parameters.AddWithValue("@DIRECCION", textBoxDireccion.Text);
+
+            textBoxCedula.Clear();
+            textBoxNombre.Clear();
+            textBoxApellido.Clear();
+            textBoxDireccion.Clear();
+
+            cmd2.ExecuteNonQuery();
+
+            MessageBox.Show("lOS DATOS FUEROS ACTUALIZADOS");
+            dataGridView1.DataSource = llenar_grid();
+        }
+
+        private void buttonDel_Click(object sender, EventArgs e)
+        {
+            conexion.Conectar();
+            string eliminar = "DELETE FROM DB_ESTUDIANTE WHERE CI = @CI";
+            SqlCommand cmd3 = new SqlCommand(eliminar, conexion.Conectar());
+            cmd3.Parameters.AddWithValue("@CI", textBoxCedula.Text);
+            
+            textBoxCedula.Clear();
+            textBoxNombre.Clear();
+            textBoxApellido.Clear();
+            textBoxDireccion.Clear();
+
+            cmd3.ExecuteNonQuery();
+            MessageBox.Show("Eliminado Registro");
+            dataGridView1.DataSource = llenar_grid();
+        }
+
+        private void buttonNew_Click(object sender, EventArgs e)
+        {
+            textBoxCedula.Clear();
+            textBoxNombre.Clear();
+            textBoxApellido.Clear();
+            textBoxDireccion.Clear();
+        }
+    }
+}
